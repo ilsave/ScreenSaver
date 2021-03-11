@@ -7,6 +7,7 @@ import android.os.BatteryManager
 import android.os.BatteryManager.BATTERY_PLUGGED_AC
 import android.os.BatteryManager.BATTERY_PLUGGED_USB
 import android.util.Log
+import android.widget.Toast
 
 
 class PowerConnectionReceiver: BroadcastReceiver() {
@@ -23,12 +24,14 @@ class PowerConnectionReceiver: BroadcastReceiver() {
         when(intent.action){
             Intent.ACTION_POWER_CONNECTED -> {
                 Log.d("Power", "Connected")
+                Toast.makeText(context, "ewqewq", Toast.LENGTH_SHORT).show()
             }
             Intent.ACTION_POWER_DISCONNECTED -> {
                 Log.d("Power", "Disconnected")
+                Toast.makeText(context, "ewqewq", Toast.LENGTH_SHORT).show()
             }
         }
 
-        Log.d("Power", "$isCharging $usbCharge $acCharge ${intent.action}")
+        Log.d("PowerB", "$isCharging $usbCharge $acCharge ${intent.action}")
     }
 }

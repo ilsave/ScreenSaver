@@ -18,13 +18,13 @@ import android.widget.MediaController
 import android.widget.VideoView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var videoView: VideoView
-    private lateinit var receiver: BroadcastReceiver
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,19 +35,10 @@ class MainActivity : AppCompatActivity() {
         val videoPath = "android.resource://" + packageName + "/" + R.raw.video
         val uri = Uri.parse(videoPath)
         videoView.setVideoURI(uri)
-
-
-        receiver = PowerConnectionReceiver()
-
-        val ifilter = IntentFilter()
-        ifilter.addAction(Intent.ACTION_POWER_CONNECTED)
-        ifilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
-        registerReceiver(receiver, ifilter)
-
-
-
         videoView.start()
 
+        val intent = Intent(this, MyService::class.java)
+        ContextCompat.startForegroundService(this, intent)
 
         videoView.setOnPreparedListener { mediaPlayer ->
             mediaPlayer.isLooping = true
@@ -55,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         videoView.setOnTouchListener { v, event ->
             Log.d("Ilsave", "Video 1 clicked, starting playback")
             finish()
-            exitProcess(0)
+           // exitProcess(0)
             false
         }
 
@@ -117,7 +108,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        unregisterReceiver(receiver);
         super.onDestroy()
     }
 }
