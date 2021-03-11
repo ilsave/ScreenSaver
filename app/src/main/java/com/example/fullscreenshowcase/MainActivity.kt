@@ -1,22 +1,18 @@
 package com.example.fullscreenshowcase
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
 import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
-import android.widget.MediaController
+import android.view.WindowManager
 import android.widget.VideoView
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import kotlin.system.exitProcess
@@ -30,6 +26,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val prefs =
+            getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val firstStart = prefs.getBoolean("firstStart", true)
+
+       if (firstStart) {
+           Log.d("Power", "changes")
+            val intent = Intent(this, MyService::class.java)
+            ContextCompat.startForegroundService(this, intent)
+            val editor = prefs.edit()
+            editor.putBoolean("firstStart", false)
+            editor.apply()
+       }
+
         hideSystemUI()
         videoView = findViewById(R.id.vvPlayer)
         val videoPath = "android.resource://" + packageName + "/" + R.raw.video
@@ -37,8 +47,7 @@ class MainActivity : AppCompatActivity() {
         videoView.setVideoURI(uri)
         videoView.start()
 
-        val intent = Intent(this, MyService::class.java)
-        ContextCompat.startForegroundService(this, intent)
+
 
         videoView.setOnPreparedListener { mediaPlayer ->
             mediaPlayer.isLooping = true
@@ -52,29 +61,31 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val receiver: BroadcastReceiver = object : BroadcastReceiver() {
-                @RequiresApi(api = Build.VERSION_CODES.M)
-                override fun onReceive(context: Context, intent: Intent?) {
-                    Log.d("Ilsave", "doze mode")
-                    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-                    if (pm.isDeviceIdleMode) {
-                        // the device is now in doze mode
-                        Log.d("Ilsave", "doze mode")
-                    } else {
-                        // the device just woke up from doze mode
-                        Log.d("Ilsave", "doze mode")
-                    }
-                }
-            }
-            registerReceiver(
-                receiver,
-                IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
-            )
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+//                @RequiresApi(api = Build.VERSION_CODES.M)
+//                override fun onReceive(context: Context, intent: Intent?) {
+//                    Log.d("Ilsave", "doze mode")
+//                    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+//                    if (pm.isDeviceIdleMode) {
+//                        // the device is now in doze mode
+//                        Log.d("Ilsave", "doze mode")
+//                    } else {
+//                        // the device just woke up from doze mode
+//                        Log.d("Ilsave", "doze mode")
+//                    }
+//                }
+//            }
+//            registerReceiver(
+//                receiver,
+//                IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
+//            )
+//        }
+
     }
     private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             window.setDecorFitsSystemWindows(false)
             window.insetsController?.let {
                 it.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())

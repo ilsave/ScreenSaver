@@ -44,7 +44,24 @@ class MyService: Service() {
         return super.onUnbind(intent)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val receiver = PowerConnectionReceiver()
+
+        val ifilter = IntentFilter()
+        ifilter.addAction(Intent.ACTION_POWER_CONNECTED)
+        ifilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+        ifilter.addAction(Intent.ACTION_SCREEN_OFF)
+        registerReceiver(receiver, ifilter)
+
+        val receiver1 = CustomBroadcastReceiver()
+
+        val ifilter1 = IntentFilter()
+        ifilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
+        registerReceiver(receiver1, ifilter1)
+
+
+
         Log.d("Power", "You have been here")
         val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -60,7 +77,6 @@ class MyService: Service() {
             channel.enableVibration(true)
             notificationManager.createNotificationChannel(channel)
         }
-
         val builder = NotificationCompat.Builder(
                 this, CHANNEL_ID_DEFAULT_PRIORITY
         )
@@ -71,26 +87,27 @@ class MyService: Service() {
 
         startForeground(5, notification)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val receiver: BroadcastReceiver = object : BroadcastReceiver() {
-                @RequiresApi(api = Build.VERSION_CODES.M)
-                override fun onReceive(context: Context, intent: Intent?) {
-                    Log.d("Ilsave", "doze mode")
-                    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-                    if (pm.isDeviceIdleMode) {
-                        // the device is now in doze mode
-                        Log.d("Ilsave", "doze mode")
-                    } else {
-                        // the device just woke up from doze mode
-                        Log.d("Ilsave", "doze mode")
-                    }
-                }
-            }
-            registerReceiver(
-                    receiver,
-                    IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
-            )
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+//                @RequiresApi(api = Build.VERSION_CODES.M)
+//                override fun onReceive(context: Context, intent: Intent?) {
+//                    Log.d("Power", "doze mode")
+//                    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+//                    if (pm.isDeviceIdleMode) {
+//                        // the device is now in doze mode
+//                        Log.d("Power", "doze mode")
+//                    } else {
+//                        // the device just woke up from doze mode
+//                        Log.d("Power", "doze mode")
+//                    }
+//                }
+//            }
+//            registerReceiver(
+//                    receiver,
+//                    IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
+//            )
+//        }
+
         return START_NOT_STICKY
     }
 
