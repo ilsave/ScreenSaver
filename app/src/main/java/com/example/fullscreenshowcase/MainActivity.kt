@@ -27,6 +27,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         val prefs =
             getSharedPreferences("prefs", Context.MODE_PRIVATE)
         val firstStart = prefs.getBoolean("firstStart", true)
@@ -106,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         finish()
-        exitProcess(0)
+       // exitProcess(0)
     }
 
 
@@ -115,10 +117,7 @@ class MainActivity : AppCompatActivity() {
         super.onConfigurationChanged(newConfig);
 
         finish()
-        exitProcess(0)
+     //   exitProcess(0)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 }

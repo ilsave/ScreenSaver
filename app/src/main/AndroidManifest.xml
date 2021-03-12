@@ -13,6 +13,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:keepScreenOn="true"
         android:theme="@style/Theme.FullScreenShowCase"
         tools:targetApi="o_mr1">
         <activity android:name=".MainActivity"
@@ -23,6 +24,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".PowerConnectionReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="android.intent.action.ACTION_SCREEN_OFF" />
+                <action android:name="android.intent.action.ACTION_SCREEN_ON" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".MyService"
