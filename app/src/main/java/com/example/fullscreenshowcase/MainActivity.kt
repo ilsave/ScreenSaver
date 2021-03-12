@@ -15,8 +15,15 @@ import android.view.WindowManager
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import kotlin.system.exitProcess
 
+/*
+WARNING!
+        пожалуйста, обратите вниание, что при апи 30 и выше необходимо разрешить
+        приложению показываться поверх других. Вот как это делается:
+        1) нажать на нотификацию
+        2) advanced
+        3) allow display over other applications
+ */
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         val prefs =
             getSharedPreferences("prefs", Context.MODE_PRIVATE)
@@ -57,32 +64,9 @@ class MainActivity : AppCompatActivity() {
         videoView.setOnTouchListener { v, event ->
             Log.d("Ilsave", "Video 1 clicked, starting playback")
             finish()
-           // exitProcess(0)
             false
         }
 
-
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            val receiver: BroadcastReceiver = object : BroadcastReceiver() {
-//                @RequiresApi(api = Build.VERSION_CODES.M)
-//                override fun onReceive(context: Context, intent: Intent?) {
-//                    Log.d("Ilsave", "doze mode")
-//                    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-//                    if (pm.isDeviceIdleMode) {
-//                        // the device is now in doze mode
-//                        Log.d("Ilsave", "doze mode")
-//                    } else {
-//                        // the device just woke up from doze mode
-//                        Log.d("Ilsave", "doze mode")
-//                    }
-//                }
-//            }
-//            registerReceiver(
-//                receiver,
-//                IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
-//            )
-//        }
 
     }
     private fun hideSystemUI() {
@@ -104,20 +88,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     override fun onBackPressed() {
         finish()
-       // exitProcess(0)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra("close_activity", false)) {
+            finish()
+        }
     }
 
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        Log.d("Ilsave", "config changed");
+        Log.d("Power", "config changed");
         super.onConfigurationChanged(newConfig);
-
         finish()
-     //   exitProcess(0)
     }
 
 }

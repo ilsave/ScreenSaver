@@ -20,6 +20,9 @@ import androidx.core.app.NotificationCompat
 class MyService: Service() {
     private var mBinder: LocalBinder = LocalBinder()
     private var usageCount = 0
+    val receiver = PowerConnectionReceiver()
+
+
 
     private val CHANNEL_ID_DEFAULT_PRIORITY = "1"
 
@@ -46,21 +49,13 @@ class MyService: Service() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val receiver = PowerConnectionReceiver()
+
 
         val ifilter = IntentFilter()
         ifilter.addAction(Intent.ACTION_POWER_CONNECTED)
         ifilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
         ifilter.addAction(Intent.ACTION_SCREEN_OFF)
         registerReceiver(receiver, ifilter)
-
-        val receiver1 = CustomBroadcastReceiver()
-
-        val ifilter1 = IntentFilter()
-        ifilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
-        registerReceiver(receiver1, ifilter1)
-
-
 
         Log.d("Power", "You have been here")
         val notificationManager =
@@ -84,31 +79,14 @@ class MyService: Service() {
                 .setContentText("Waiting for device to fall in doze mode!")
                 .setStyle(NotificationCompat.DecoratedCustomViewStyle())
         val notification: Notification = builder.build()
-
         startForeground(5, notification)
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            val receiver: BroadcastReceiver = object : BroadcastReceiver() {
-//                @RequiresApi(api = Build.VERSION_CODES.M)
-//                override fun onReceive(context: Context, intent: Intent?) {
-//                    Log.d("Power", "doze mode")
-//                    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-//                    if (pm.isDeviceIdleMode) {
-//                        // the device is now in doze mode
-//                        Log.d("Power", "doze mode")
-//                    } else {
-//                        // the device just woke up from doze mode
-//                        Log.d("Power", "doze mode")
-//                    }
-//                }
-//            }
-//            registerReceiver(
-//                    receiver,
-//                    IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
-//            )
-//        }
-
         return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        unregisterReceiver(receiver)
+        super.onDestroy()
     }
 
 }

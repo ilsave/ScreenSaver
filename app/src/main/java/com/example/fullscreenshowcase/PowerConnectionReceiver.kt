@@ -14,51 +14,32 @@ import android.os.PowerManager.WakeLock
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 
 
 class PowerConnectionReceiver: BroadcastReceiver() {
 
+    private var disconnected = false
+
     @SuppressLint("InvalidWakeLockTag")
     @RequiresApi(Build.VERSION_CODES.KITKAT_WATCH)
     override fun onReceive(context: Context?, intent: Intent?) {
-        val status = intent!!.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                status == BatteryManager.BATTERY_STATUS_FULL
 
-        val chargePlug = intent!!.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
-        val usbCharge = chargePlug == BATTERY_PLUGGED_USB
-        val acCharge = chargePlug == BATTERY_PLUGGED_AC
-
-        when(intent.action){
+        when(intent?.action){
             Intent.ACTION_POWER_CONNECTED -> {
+                disconnected = false
                 Log.d("Power", "Connected")
-                Toast.makeText(context, "ewqewq", Toast.LENGTH_SHORT).show()
-
-                val intent = Intent(context, MainActivity::class.java)
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
-                pendingIntent.send()
-            }
-            Intent.ACTION_POWER_DISCONNECTED -> {
-                Log.d("Power", "Disconnected")
-                Toast.makeText(context, "ewqewq", Toast.LENGTH_SHORT).show()
-            }
-            Intent.ACTION_SCREEN_OFF -> {
-                Log.d("Power", "Off")
-
-
-
                 val str = "MainReceiver"
+
                 val pm =  context?.getSystemService(Context.POWER_SERVICE) as PowerManager
                 val wakeLock: WakeLock = pm.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                        or PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP), str )
-                Toast.makeText(context, "IM ilsave", Toast.LENGTH_SHORT).show()
+                        or PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP),
+                        "MainReceiver"
+                )
                 wakeLock.acquire(1000L);
 
                 val job = GlobalScope.launch(Dispatchers.Main) {
@@ -66,19 +47,49 @@ class PowerConnectionReceiver: BroadcastReceiver() {
                     delay(3000L)
                     Log.d("Power", "ты в корутине")
                     val intent = Intent(context, MainActivity::class.java)
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
                     val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
                     pendingIntent.send()
                 }
+            }
+            Intent.ACTION_POWER_DISCONNECTED -> {
+                Log.d("Power", "Disconnected")
+                val i = Intent(context, MainActivity::class.java)
+                i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                i.putExtra("close_activity", true)
+                context!!.startActivity(i)
+                disconnected = true
+            }
+            Intent.ACTION_SCREEN_OFF -> {
+                Log.d("Power", "Off")
+                if (!disconnected){
+                    val str = "MainReceiver"
+                    val pm =  context?.getSystemService(Context.POWER_SERVICE) as PowerManager
+                    val wakeLock: WakeLock = pm.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK
+                            or PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP), str )
+                    wakeLock.acquire(1000L);
 
-
-//                val myIntent = Intent(context, MainActivity::class.java)
-//                myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                context?.startActivity(myIntent)
-                Toast.makeText(context, "ewqewq", Toast.LENGTH_SHORT).show()
+                    val job = GlobalScope.launch(Dispatchers.Main) {
+                        delay(1000L)
+                        Log.d("Power", "ты в корутине")
+                        val intent = Intent(context, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
+                        val pendingIntent = PendingIntent.getActivity(context,
+                                0, intent, 0)
+                        pendingIntent.send()
+                    }
+                }
+            }
+            Intent.ACTION_BOOT_COMPLETED -> {
+                Log.d("Power", "Boot completed!")
+                ContextCompat.startForegroundService(context!!,
+                        Intent(context, MyService::class.java))
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                val pendingIntent = PendingIntent.getActivity(context, 0,
+                        Intent(context, MainActivity::class.java), 0)
+                pendingIntent.send()
             }
         }
-
-        Log.d("PowerB", "$isCharging $usbCharge $acCharge ${intent.action}")
     }
 }
