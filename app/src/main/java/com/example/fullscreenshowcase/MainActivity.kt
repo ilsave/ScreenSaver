@@ -55,9 +55,6 @@ class MainActivity : AppCompatActivity() {
         val uri = Uri.parse(videoPath)
         videoView.setVideoURI(uri)
         videoView.start()
-
-
-
         videoView.setOnPreparedListener { mediaPlayer ->
             mediaPlayer.isLooping = true
         }
@@ -66,9 +63,8 @@ class MainActivity : AppCompatActivity() {
             finish()
             false
         }
-
-
     }
+
     private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -99,11 +95,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         Log.d("Power", "config changed");
         super.onConfigurationChanged(newConfig);
         finish()
     }
-
 }
